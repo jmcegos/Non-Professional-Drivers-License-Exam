@@ -1,7 +1,8 @@
 # Non-Professional Driver's License Examination
 
 A self-contained, offline-capable written examination for a Non-Professional
-Driver's License, modelled on the Philippine LTO written test.
+Driver's License, modelled on the Philippine LTO written test. Every sitting
+draws a fresh random paper from a shared question bank.
 
 **[Take the exam](https://jmcegos.github.io/Non-Professional-Drivers-License-Exam/exam.html)** ·
 **[Answer key (proctor)](https://jmcegos.github.io/Non-Professional-Drivers-License-Exam/answer-key.html)**
@@ -12,11 +13,15 @@ _(Links work once GitHub Pages is enabled — see Deployment below.)_
 
 | | |
 |---|---|
-| Items | 60 |
+| Questions in the bank | 175 |
+| Questions per sitting | 60, drawn at random |
 | Time limit | 60 minutes |
 | Passing score | 45 of 60 (75%) |
 | Illustrated items | 22 |
 
+- **Random paper every session.** Each sitting draws 60 distinct items from the
+  bank using a partial Fisher–Yates shuffle, so no question repeats within a
+  paper and two consecutive papers overlap by only about a third.
 - **Examinee details first** — name, reference number, date of birth, and vehicle
   category are captured before the timer starts.
 - **One question per screen.** Select an answer, press *Submit Answer*, and the
@@ -26,19 +31,25 @@ _(Links work once GitHub Pages is enabled — see Deployment below.)_
   00:00 with any unanswered items marked incorrect.
 - **Results screen** with the score, pass/fail verdict, correct/incorrect/blank
   and time-used tiles, and a full item review showing your answer, the correct
-  answer, and a one-line explanation for every question.
+  answer, and a one-line explanation — each tagged with its bank item number.
 - **Printable** result sheet and answer key.
 
-Coverage spans road signs and pavement markings, right of way, speed limits,
-defensive driving and vehicle emergencies, plus RA 8750 (seat belts), RA 10054
-(helmets), RA 10586 (drunk driving), RA 10913 (distracted driving), and
-RA 11229 (child restraints).
+Coverage spans road signs, signals and pavement markings; right of way, speed
+limits, overtaking and parking; licensing and registration; vehicle care and
+mechanical failures; night, rain and fog driving; emergencies and first aid;
+driver behaviour; plus RA 8749, RA 8750, RA 10054, RA 10586, RA 10913 and
+RA 11229.
 
 ## Answer key
 
-`answer-key.html` sits behind a sign-in form and provides a quick-reference grid
-of correct letters, the full key with every option and an explanation, and a
-table of attempts recorded in that browser.
+`answer-key.html` sits behind a sign-in form and provides:
+
+- a **quick-reference grid** of the correct letter for every item in the bank,
+  numbered by bank item (not by position in a paper, since papers differ);
+- the **full key** with every option and an explanation;
+- a **search box** to find an item by keyword or number;
+- a table of **recorded attempts**, each expandable to show the exact 60 items
+  that examinee was given, their answer, and the correct answer side by side.
 
 > **The sign-in is cosmetic, not security.** The credentials are plain JavaScript
 > in `answer-key.html`, so anyone who opens the page source — or reads this
@@ -53,9 +64,9 @@ Credentials as configured: `RosgenGwapa` / `EgosGwapo`.
 | File | Purpose |
 |---|---|
 | `index.html` | Landing page linking to the exam and the answer key |
-| `exam.html` | The examination: timer, question flow, scoring, item review |
+| `exam.html` | The examination: random draw, timer, scoring, item review |
 | `answer-key.html` | Proctor answer key behind the sign-in form |
-| `questions.js` | The 60-item question bank — the single source of truth |
+| `questions.js` | The question bank — the single source of truth |
 | `signs.js` | Road-sign and pavement-marking illustrations as inline SVG |
 
 ## Running it
@@ -75,22 +86,48 @@ list attempts taken in that same browser. Nothing is transmitted anywhere.
 
 ```js
 {
+  id: 4,                          // stable; attempts record which ids were drawn
   q: "A flashing RED traffic light means:",
-  art: "lightRedFlash",        // optional; a key from signs.js
+  art: "lightRedFlash",           // optional; a key from signs.js
   choices: ["...", "...", "...", "..."],
-  answer: 3,                    // 0-based index of the correct choice
+  answer: 3,                      // 0-based index of the correct choice
   why: "A flashing red light is treated exactly like a STOP sign."
 }
 ```
 
-Item counts, the passing-score line, and the progress indicator all derive from
-the bank at runtime, so adding or removing questions needs no edits to the HTML.
-The time limit and passing score live in `EXAM_META` at the top of the file.
+Session length and pass mark live in `EXAM_META` at the top of the file:
 
-Two conventions worth keeping if you extend it: correct answers are distributed
-evenly across A/B/C/D with no long runs, so the key cannot be gamed by pattern;
-and questions whose options are purely numeric keep those options in ascending
-order rather than shuffled.
+```js
+durationMinutes: 60,
+itemsPerSession: 60,   // how many are drawn per sitting
+passingPercent: 75     // pass mark, applied to itemsPerSession
+```
+
+To grow the bank, append entries and give each a new `id`. Everything else —
+item counts, the passing line, the progress bar, the answer key grid — derives
+from the bank at runtime, so no HTML needs editing. If the bank ever holds fewer
+items than `itemsPerSession`, a session simply uses the whole bank.
+
+Three conventions worth preserving:
+
+1. **Even answer spread.** Correct answers are distributed evenly across A–D with
+   no run longer than three following a pattern, so the key cannot be gamed.
+2. **Numeric options stay in ascending order** rather than being shuffled — an
+   item reading "40 | 100 | 60 | 80" looks like a typo, not a distractor.
+3. **No duplicate stems.** Duplicates make a random draw feel repetitive.
+
+### On bank size
+
+The draw is O(n) per session and was measured at 1.79 ms per draw against a
+10,000-item bank, so the code imposes no practical ceiling. The real limits are
+elsewhere: `answer-key.html` renders the entire bank at once and would need
+pagination past a few thousand items, and `localStorage` (~5 MB) caps
+items × retained attempts — the exam keeps the 50 most recent.
+
+Be aware that the subject itself is the binding constraint. Genuinely distinct
+LTO written-exam questions number in the high hundreds at most; padding a bank
+into the thousands means near-duplicates, which a 60-item draw will surface in
+the same sitting and which make the exam worse rather than more varied.
 
 ## Deployment
 

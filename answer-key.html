@@ -162,8 +162,11 @@
       <div class="toolbar no-print">
         <button class="btn-ghost" onclick="window.print()">Print Answer Key</button>
         <button class="btn-ghost" id="btnToggleWhy">Hide Explanations</button>
+        <input id="filter" type="search" placeholder="Search the bank by keyword or item number"
+               style="font:inherit;flex:1 1 240px;min-width:0;padding:9px 12px;border:2px solid var(--line);border-radius:9px;background:#fbfcfe">
       </div>
-      <h3 style="font-size:1rem;margin:0 0 10px">Quick Reference</h3>
+      <p class="muted no-print" id="filterCount" style="font-size:.82rem;margin:-8px 0 14px"></p>
+      <h3 style="font-size:1rem;margin:0 0 10px">Quick Reference &mdash; Correct Letter by Bank Item</h3>
       <div class="quickgrid" id="quickGrid"></div>
       <h3 style="font-size:1rem;margin:0 0 12px">Full Key with Explanations</h3>
       <div id="keyList"></div>
@@ -229,26 +232,46 @@
     btnLogout.classList.remove('hidden');
     document.getElementById('lockIcon').innerHTML = '&#128275;';
     document.getElementById('headSub').textContent = 'Signed in as ' + CREDENTIALS.username;
-    buildKey();
+    buildKey('');
     buildAttempts();
   }
 
   // ---------- answer key ----------
-  function buildKey() {
-    document.getElementById('keyMeta').textContent =
-      QUESTIONS.length + ' items · Time limit ' + EXAM_META.durationMinutes +
-      ' minutes · Passing score ' + EXAM_META.passingScore + ' of ' + QUESTIONS.length +
-      ' (' + Math.round(EXAM_META.passingScore / QUESTIONS.length * 100) + '%)';
+  var TOTAL = Math.min(EXAM_META.itemsPerSession, QUESTIONS.length);
+  var PASSING = Math.round(TOTAL * EXAM_META.passingPercent / 100);
+  var byId = {};
+  QUESTIONS.forEach(function (q) { byId[q.id] = q; });
+
+  function buildKey(filter) {
+    document.getElementById('keyMeta').innerHTML =
+      '<strong>' + QUESTIONS.length + ' items in the bank.</strong> Each sitting draws ' +
+      TOTAL + ' of them at random · Time limit ' + EXAM_META.durationMinutes +
+      ' minutes · Passing score ' + PASSING + ' of ' + TOTAL +
+      ' (' + EXAM_META.passingPercent + '%)' +
+      '<br>Because every paper is different, the key below is the whole bank, ' +
+      'numbered by <em>bank item</em>. To grade one examinee, open their attempt ' +
+      'below &mdash; it lists the exact items they were given.';
+
+    var needle = (filter || '').trim().toLowerCase();
+    var shown = QUESTIONS.filter(function (q) {
+      if (!needle) return true;
+      return q.q.toLowerCase().indexOf(needle) > -1 ||
+             q.choices.join(' ').toLowerCase().indexOf(needle) > -1 ||
+             String(q.id) === needle;
+    });
+
+    document.getElementById('filterCount').textContent =
+      needle ? 'Showing ' + shown.length + ' of ' + QUESTIONS.length + ' items.' : '';
 
     var grid = document.getElementById('quickGrid');
     var list = document.getElementById('keyList');
     grid.innerHTML = '';
     list.innerHTML = '';
 
-    QUESTIONS.forEach(function (q, i) {
+    shown.forEach(function (q) {
       var cell = document.createElement('div');
       cell.className = 'qg';
-      cell.innerHTML = '<div class="n">No. ' + (i + 1) + '</div><div class="a">' + LETTERS[q.answer] + '</div>';
+      cell.innerHTML = '<div class="n">#' + q.id + '</div><div class="a">' + LETTERS[q.answer] + '</div>';
       grid.appendChild(cell);
 
       var item = document.createElement('div');
@@ -259,13 +282,21 @@
       var art = q.art && typeof SIGN_ART !== 'undefined' && SIGN_ART[q.art]
         ? '<div class="art">' + SIGN_ART[q.art] + '</div>' : '';
       item.innerHTML =
-        '<div class="q">' + (i + 1) + '. ' + esc(q.q) + '</div>' +
+        '<div class="q">#' + q.id + ' &nbsp; ' + esc(q.q) + '</div>' +
         art +
         '<ol type="A">' + opts + '</ol>' +
         '<div class="why">' + esc(q.why) + '</div>';
       list.appendChild(item);
     });
+
+    if (!shown.length) {
+      list.innerHTML = '<div class="notice">No items match that search.</div>';
+    }
   }
+
+  document.getElementById('filter').addEventListener('input', function () {
+    buildKey(this.value);
+  });
 
   document.getElementById('btnToggleWhy').addEventListener('click', function () {
     var hiding = this.textContent.indexOf('Hide') === 0;
@@ -318,15 +349,34 @@
   }
 
   function detailHtml(a) {
-    var cells = (a.responses || []).map(function (r, i) {
-      var ok = r === QUESTIONS[i].answer;
-      var color = r === null ? 'var(--muted)' : (ok ? 'var(--ok)' : 'var(--bad)');
-      return '<div class="qg" style="border-color:' + color + '">' +
-        '<div class="n">No. ' + (i + 1) + '</div>' +
-        '<div class="a" style="color:' + color + '">' + (r === null ? '&ndash;' : LETTERS[r]) + '</div>' +
+    // Attempts store the bank ids drawn, so the exact paper can be rebuilt.
+    // Older attempts saved before random draws have no `items` list.
+    var ids = a.items;
+    if (!ids) {
+      return '<div class="notice">This attempt was recorded before random draws were ' +
+        'introduced, so the exact items it used are not stored. Score: ' +
+        a.correct + ' of ' + a.total + '.</div>';
+    }
+
+    var cells = ids.map(function (id, i) {
+      var q = byId[id];
+      var r = (a.responses || [])[i];
+      var ok = q && r === q.answer;
+      var color = r === null || r === undefined ? 'var(--muted)' : (ok ? 'var(--ok)' : 'var(--bad)');
+      var given = (r === null || r === undefined) ? '&ndash;' : LETTERS[r];
+      var key = q ? LETTERS[q.answer] : '?';
+      return '<div class="qg" style="border-color:' + color + '" title="' +
+        (q ? esc(q.q).replace(/"/g, '&quot;') : 'item no longer in the bank') + '">' +
+        '<div class="n">#' + id + '</div>' +
+        '<div class="a" style="color:' + color + '">' + given + '</div>' +
+        '<div class="n">key ' + key + '</div>' +
         '</div>';
     }).join('');
-    return '<div class="muted" style="font-size:.82rem;margin:6px 0">Answers given (green = correct, red = incorrect, dash = unanswered):</div>' +
+
+    return '<div class="muted" style="font-size:.82rem;margin:6px 0">' +
+      'The ' + ids.length + ' bank items this examinee was given, in order. ' +
+      'Large letter = their answer (green correct, red incorrect, dash unanswered); ' +
+      'below it, the correct letter. Hover an item to read the question.</div>' +
       '<div class="quickgrid" style="margin-bottom:10px">' + cells + '</div>';
   }
 

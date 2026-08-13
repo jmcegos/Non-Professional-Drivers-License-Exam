@@ -262,6 +262,7 @@
       <strong>Examination Rules</strong>
       <ul>
         <li>This examination has <strong id="ruleCount">&mdash;</strong> and a time limit of <strong id="ruleTime">&mdash;</strong>.</li>
+        <li id="ruleBank">&mdash;</li>
         <li>Questions are presented <strong>one at a time</strong>. Select an answer, then press <em>Submit Answer</em> to move to the next question.</li>
         <li>Once submitted, an answer is <strong>final</strong> &mdash; you cannot go back.</li>
         <li>A passing score is <strong id="rulePass">&mdash;</strong>.</li>
@@ -331,9 +332,13 @@
 (function () {
   'use strict';
 
-  var TOTAL = QUESTIONS.length;
+  // The bank may hold far more items than one sitting uses; a session draws
+  // TOTAL of them at random, so no two papers are the same.
+  var TOTAL = Math.min(EXAM_META.itemsPerSession, QUESTIONS.length);
+  var PASSING = Math.round(TOTAL * EXAM_META.passingPercent / 100);
   var LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
+  var paper = [];                // the questions drawn for this session, in order
   var current = 0;               // index of question on screen
   var picked = null;             // choice index selected for the current question
   var responses = new Array(TOTAL).fill(null);
@@ -370,8 +375,10 @@
   document.getElementById('ruleCount').textContent = TOTAL + ' questions';
   document.getElementById('ruleTime').textContent = EXAM_META.durationMinutes + ' minutes';
   document.getElementById('rulePass').textContent =
-    EXAM_META.passingScore + ' out of ' + TOTAL +
-    ' (' + Math.round(EXAM_META.passingScore / TOTAL * 100) + '%)';
+    PASSING + ' out of ' + TOTAL + ' (' + EXAM_META.passingPercent + '%)';
+  document.getElementById('ruleBank').textContent =
+    'Your ' + TOTAL + ' questions are drawn at random from a bank of ' +
+    QUESTIONS.length + ', so each sitting is different.';
 
   // ---------- start ----------
   document.getElementById('btnStart').addEventListener('click', function () {
@@ -388,6 +395,7 @@
       category: document.getElementById('fCat').value
     };
 
+    paper = drawPaper();
     startedAt = new Date();
     deadline = startedAt.getTime() + EXAM_META.durationMinutes * 60 * 1000;
 
@@ -398,6 +406,19 @@
     ticker = setInterval(tick, 250);
     render();
   });
+
+  // ---------- draw this session's paper ----------
+  // Partial Fisher-Yates over the bank indices: an unbiased sample of TOTAL
+  // distinct items, so a question can never repeat within one sitting.
+  function drawPaper() {
+    var idx = [];
+    for (var i = 0; i < QUESTIONS.length; i++) idx.push(i);
+    for (var n = 0; n < TOTAL; n++) {
+      var j = n + Math.floor(Math.random() * (idx.length - n));
+      var t = idx[n]; idx[n] = idx[j]; idx[j] = t;
+    }
+    return idx.slice(0, TOTAL).map(function (i) { return QUESTIONS[i]; });
+  }
 
   // ---------- timer ----------
   function tick() {
@@ -418,7 +439,7 @@
 
   // ---------- render one question ----------
   function render() {
-    var q = QUESTIONS[current];
+    var q = paper[current];
     picked = null;
 
     el.qNum.textContent = 'Question ' + (current + 1);
@@ -496,12 +517,12 @@
 
     responses.forEach(function (r, i) {
       if (r === null) blank++;
-      else if (r === QUESTIONS[i].answer) correct++;
+      else if (r === paper[i].answer) correct++;
       else wrong++;
     });
 
     var pct = Math.round(correct / TOTAL * 100);
-    var passed = correct >= EXAM_META.passingScore;
+    var passed = correct >= PASSING;
     var secondsUsed = Math.min(
       EXAM_META.durationMinutes * 60,
       Math.round((Date.now() - startedAt.getTime()) / 1000)
@@ -525,12 +546,14 @@
       '<br>Category: ' + escapeHtml(examinee.category) +
       ' &nbsp;&middot;&nbsp; ' + startedAt.toLocaleString() +
       (timedOut ? '<br><span style="color:var(--bad);font-weight:600">Submitted automatically &mdash; time expired.</span>' : '') +
-      '<br>Passing score: ' + EXAM_META.passingScore + ' of ' + TOTAL +
-      ' (' + Math.round(EXAM_META.passingScore / TOTAL * 100) + '%)';
+      '<br>Passing score: ' + PASSING + ' of ' + TOTAL +
+      ' (' + EXAM_META.passingPercent + '%)' +
+      '<br><span style="font-size:.85rem">Drawn at random from a bank of ' +
+      QUESTIONS.length + ' questions.</span>';
 
     // ---- item review ----
     el.review.innerHTML = '';
-    QUESTIONS.forEach(function (q, i) {
+    paper.forEach(function (q, i) {
       var r = responses[i];
       var isRight = r === q.answer;
       var d = document.createElement('div');
@@ -539,7 +562,8 @@
         ? '<div class="art art-sm">' + SIGN_ART[q.art] + '</div>' : '';
       d.innerHTML =
         '<div class="rq">' + (i + 1) + '. ' + escapeHtml(q.q) +
-        ' <span class="tag ' + (isRight ? 'right' : 'wrong') + '">' + (isRight ? 'Correct' : 'Incorrect') + '</span></div>' +
+        ' <span class="tag ' + (isRight ? 'right' : 'wrong') + '">' + (isRight ? 'Correct' : 'Incorrect') + '</span>' +
+        '<span class="muted" style="font-weight:400;font-size:.78rem"> &nbsp;bank item #' + q.id + '</span></div>' +
         thumb +
         '<div class="ra">Your answer: <strong>' +
         (r === null ? '<em>(no answer)</em>' : LETTERS[r] + '. ' + escapeHtml(q.choices[r])) +
@@ -565,7 +589,10 @@
         wrong: wrong,
         blank: blank,
         total: TOTAL,
+        passing: PASSING,
         passed: passed,
+        // the bank ids drawn, in the order sat, so the paper can be rebuilt
+        items: paper.map(function (q) { return q.id; }),
         responses: responses
       });
       localStorage.setItem('npdlExamAttempts', JSON.stringify(log.slice(0, 50)));

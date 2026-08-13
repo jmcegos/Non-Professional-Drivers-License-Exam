@@ -42,10 +42,11 @@
     padding: 28px;
   }
 
-  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 0 0 26px; }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin: 0 0 12px; }
   .fact { background: #f7f9fc; border: 1px solid var(--line); border-radius: 10px; padding: 14px; text-align: center; }
   .fact b { display: block; font-size: 1.4rem; }
   .fact span { font-size: .72rem; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); }
+  .facts-note { font-size: .84rem; color: var(--muted); text-align: center; margin: 0 0 26px; }
 
   .choice-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   a.panel {
@@ -83,26 +84,28 @@
   <div class="card">
 
     <div class="facts">
-      <div class="fact"><b>60</b><span>Questions</span></div>
+      <div class="fact"><b>175</b><span>In the bank</span></div>
+      <div class="fact"><b>60</b><span>Per sitting</span></div>
       <div class="fact"><b>60</b><span>Minutes</span></div>
-      <div class="fact"><b>45</b><span>To Pass</span></div>
-      <div class="fact"><b>22</b><span>Illustrated</span></div>
+      <div class="fact"><b>45</b><span>To pass</span></div>
     </div>
+    <p class="facts-note">Your 60 questions are drawn at random, so every sitting is different.</p>
 
     <div class="choice-row">
       <a class="panel" href="exam.html">
         <h2>Take the Examination &rarr;</h2>
-        <p>60 questions, one at a time, with a 60-minute countdown and an instant scored result.</p>
+        <p>60 random questions, one at a time, with a 60-minute countdown and an instant scored result.</p>
       </a>
       <a class="panel key" href="answer-key.html">
         <h2>Answer Key &rarr;</h2>
-        <p>For proctors. Sign-in required. Includes explanations and recorded attempts.</p>
+        <p>For proctors. Sign-in required. Searchable, with explanations and recorded attempts.</p>
       </a>
     </div>
 
     <h3>How it works</h3>
     <ul>
       <li>Enter your details, then press Start &mdash; the timer begins immediately.</li>
+      <li>Your paper is drawn at random from the bank; no question repeats within a sitting.</li>
       <li>Answer one question per screen. Press <em>Submit Answer</em> to lock it in and move on.</li>
       <li>Submitted answers are final; you cannot return to a previous question.</li>
       <li>At 00:00 the paper is submitted automatically and blanks are marked incorrect.</li>
@@ -113,8 +116,10 @@
     <ul>
       <li>Road signs, signals, and pavement markings</li>
       <li>Right of way, speed limits, overtaking, and parking</li>
-      <li>Defensive driving and vehicle emergencies</li>
-      <li>RA 8750, RA 10054, RA 10586, RA 10913, and RA 11229</li>
+      <li>Licensing, registration, and the documents you must carry</li>
+      <li>Vehicle care, mechanical failures, and emergencies</li>
+      <li>Night, rain, and fog driving; defensive driving and behaviour</li>
+      <li>RA 8749, RA 8750, RA 10054, RA 10586, RA 10913, and RA 11229</li>
     </ul>
 
     <div class="note">
