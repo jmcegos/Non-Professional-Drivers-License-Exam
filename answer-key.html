@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Answer Key &mdash; Proctor Access</title>
+<style>
+  :root {
+    --bg: #eef2f7;
+    --card: #ffffff;
+    --ink: #16202e;
+    --muted: #5f6f85;
+    --line: #d8e0ea;
+    --brand: #12508f;
+    --brand-dark: #0d3c6d;
+    --ok: #1c8a4a;
+    --bad: #c62b2b;
+    --shadow: 0 10px 30px rgba(18, 32, 46, .10);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  header {
+    background: linear-gradient(135deg, #24304a, #131a2a);
+    color: #fff;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+  }
+  .head-wrap { max-width: 960px; margin: 0 auto; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .head-wrap h1 { margin: 0; font-size: 1.12rem; flex: 1 1 240px; }
+  .head-wrap p { margin: 2px 0 0; font-size: .8rem; opacity: .8; }
+  .lock { font-size: 1.5rem; }
+
+  main { max-width: 960px; margin: 26px auto 60px; padding: 0 20px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 26px;
+    margin-bottom: 20px;
+  }
+  h2 { margin: 0 0 6px; font-size: 1.25rem; }
+  .muted { color: var(--muted); }
+  .hidden { display: none !important; }
+
+  /* ---------- login ---------- */
+  .login-wrap { max-width: 400px; margin: 40px auto; }
+  .field { margin-bottom: 15px; }
+  .field label { display: block; font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 5px; }
+  .field input {
+    font: inherit; width: 100%; padding: 11px 13px;
+    border: 2px solid var(--line); border-radius: 9px; background: #fbfcfe;
+  }
+  .field input:focus { outline: 0; border-color: var(--brand); }
+  .error { background: #fdeaea; color: var(--bad); border-left: 4px solid var(--bad); border-radius: 6px; padding: 10px 14px; font-size: .88rem; margin-bottom: 14px; }
+
+  button {
+    font: inherit; font-weight: 600; border: 0; border-radius: 9px;
+    padding: 12px 24px; cursor: pointer; transition: filter .15s, border-color .15s;
+  }
+  .btn-primary { background: var(--brand); color: #fff; width: 100%; }
+  .btn-primary:hover { filter: brightness(1.12); }
+  .btn-ghost { background: #fff; color: var(--brand); border: 2px solid var(--line); }
+  .btn-ghost:hover { border-color: var(--brand); }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+  /* ---------- key table ---------- */
+  .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
+  .quickgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: 8px; margin-bottom: 26px; }
+  .qg {
+    border: 1px solid var(--line); border-radius: 8px; background: #f7f9fc;
+    text-align: center; padding: 7px 4px;
+  }
+  .qg .n { font-size: .68rem; color: var(--muted); letter-spacing: .5px; }
+  .qg .a { font-size: 1.2rem; font-weight: 800; color: var(--brand); line-height: 1.1; }
+
+  .item { border: 1px solid var(--line); border-radius: 10px; padding: 15px 17px; margin-bottom: 12px; }
+  .item .q { font-weight: 600; margin-bottom: 10px; }
+  .art {
+    padding: 12px;
+    margin: 0 0 12px;
+    background: #f7f9fc;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    text-align: center;
+  }
+  .art svg { width: auto; max-width: 100%; max-height: 130px; height: auto; }
+  .item ol { margin: 0; padding-left: 26px; }
+  .item ol li { margin-bottom: 3px; }
+  .item ol li.correct { color: var(--ok); font-weight: 700; }
+  .item ol li.correct::after { content: ' \2713  CORRECT'; font-size: .72rem; letter-spacing: .6px; }
+  .why { margin-top: 9px; font-size: .87rem; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+
+  /* ---------- attempts ---------- */
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  th { font-size: .72rem; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+  .pill { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; padding: 2px 9px; border-radius: 99px; }
+  .pill.pass { background: #e2f5e9; color: var(--ok); }
+  .pill.fail { background: #fdeaea; color: var(--bad); }
+  .notice { background: #fffbea; border-left: 4px solid #f4b703; border-radius: 6px; padding: 12px 15px; font-size: .86rem; }
+
+  @media print {
+    header, .toolbar, .actions, .no-print { display: none !important; }
+    body { background: #fff; }
+    .card { box-shadow: none; border: 0; padding: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-wrap">
+    <span class="lock" id="lockIcon">&#128274;</span>
+    <div>
+      <h1>Answer Key &mdash; Non-Professional Driver's License Exam</h1>
+      <p id="headSub">Restricted: authorized proctors only</p>
+    </div>
+    <button class="btn-ghost hidden" id="btnLogout">Log out</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ LOGIN ============ -->
+  <section id="loginScreen" class="card login-wrap">
+    <h2>Proctor Sign In</h2>
+    <p class="muted" style="font-size:.9rem">Enter your credentials to view the answer key.</p>
+
+    <div class="error hidden" id="loginError">Invalid username or password.</div>
+
+    <form id="loginForm" autocomplete="off">
+      <div class="field">
+        <label for="user">Username</label>
+        <input id="user" type="text" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="pass">Password</label>
+        <input id="pass" type="password" autocomplete="off">
+      </div>
+      <button class="btn-primary" type="submit">Sign In</button>
+    </form>
+
+    <p class="muted" style="font-size:.8rem;margin-top:16px">
+      <a href="exam.html" style="color:var(--brand)">&larr; Back to the examination</a>
+    </p>
+  </section>
+
+  <!-- ============ KEY ============ -->
+  <section id="keyScreen" class="hidden">
+
+    <div class="card">
+      <h2>Official Answer Key</h2>
+      <p class="muted" id="keyMeta"></p>
+      <div class="toolbar no-print">
+        <button class="btn-ghost" onclick="window.print()">Print Answer Key</button>
+        <button class="btn-ghost" id="btnToggleWhy">Hide Explanations</button>
+      </div>
+      <h3 style="font-size:1rem;margin:0 0 10px">Quick Reference</h3>
+      <div class="quickgrid" id="quickGrid"></div>
+      <h3 style="font-size:1rem;margin:0 0 12px">Full Key with Explanations</h3>
+      <div id="keyList"></div>
+    </div>
+
+    <div class="card">
+      <h2>Recorded Attempts on This Device</h2>
+      <p class="muted" style="font-size:.9rem">Results saved by <code>exam.html</code> in this browser's local storage. Most recent first.</p>
+      <div id="attempts"></div>
+      <div class="actions no-print">
+        <button class="btn-ghost" id="btnClearAttempts">Clear Attempt History</button>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<script src="signs.js"></script>
+<script src="questions.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* NOTE: This is a front-end-only gate for classroom/offline use.
+     The credentials sit in this file, so anyone who can open the file can read
+     them. Do not treat this as real security — move the check to a server if
+     the key must actually stay secret. */
+  var CREDENTIALS = { username: 'RosgenGwapa', password: 'EgosGwapo' };
+
+  var LETTERS = ['A', 'B', 'C', 'D', 'E'];
+  var SESSION_FLAG = 'npdlProctorSignedIn';
+
+  var loginScreen = document.getElementById('loginScreen');
+  var keyScreen = document.getElementById('keyScreen');
+  var loginError = document.getElementById('loginError');
+  var btnLogout = document.getElementById('btnLogout');
+
+  document.getElementById('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var u = document.getElementById('user').value.trim();
+    var p = document.getElementById('pass').value;
+
+    if (u === CREDENTIALS.username && p === CREDENTIALS.password) {
+      try { sessionStorage.setItem(SESSION_FLAG, '1'); } catch (err) {}
+      unlock();
+    } else {
+      loginError.classList.remove('hidden');
+      loginError.textContent = 'Invalid username or password.';
+      document.getElementById('pass').value = '';
+      document.getElementById('pass').focus();
+    }
+  });
+
+  btnLogout.addEventListener('click', function () {
+    try { sessionStorage.removeItem(SESSION_FLAG); } catch (err) {}
+    location.reload();
+  });
+
+  function unlock() {
+    loginScreen.classList.add('hidden');
+    keyScreen.classList.remove('hidden');
+    btnLogout.classList.remove('hidden');
+    document.getElementById('lockIcon').innerHTML = '&#128275;';
+    document.getElementById('headSub').textContent = 'Signed in as ' + CREDENTIALS.username;
+    buildKey();
+    buildAttempts();
+  }
+
+  // ---------- answer key ----------
+  function buildKey() {
+    document.getElementById('keyMeta').textContent =
+      QUESTIONS.length + ' items · Time limit ' + EXAM_META.durationMinutes +
+      ' minutes · Passing score ' + EXAM_META.passingScore + ' of ' + QUESTIONS.length +
+      ' (' + Math.round(EXAM_META.passingScore / QUESTIONS.length * 100) + '%)';
+
+    var grid = document.getElementById('quickGrid');
+    var list = document.getElementById('keyList');
+    grid.innerHTML = '';
+    list.innerHTML = '';
+
+    QUESTIONS.forEach(function (q, i) {
+      var cell = document.createElement('div');
+      cell.className = 'qg';
+      cell.innerHTML = '<div class="n">No. ' + (i + 1) + '</div><div class="a">' + LETTERS[q.answer] + '</div>';
+      grid.appendChild(cell);
+
+      var item = document.createElement('div');
+      item.className = 'item';
+      var opts = q.choices.map(function (c, ci) {
+        return '<li class="' + (ci === q.answer ? 'correct' : '') + '">' + esc(c) + '</li>';
+      }).join('');
+      var art = q.art && typeof SIGN_ART !== 'undefined' && SIGN_ART[q.art]
+        ? '<div class="art">' + SIGN_ART[q.art] + '</div>' : '';
+      item.innerHTML =
+        '<div class="q">' + (i + 1) + '. ' + esc(q.q) + '</div>' +
+        art +
+        '<ol type="A">' + opts + '</ol>' +
+        '<div class="why">' + esc(q.why) + '</div>';
+      list.appendChild(item);
+    });
+  }
+
+  document.getElementById('btnToggleWhy').addEventListener('click', function () {
+    var hiding = this.textContent.indexOf('Hide') === 0;
+    Array.prototype.forEach.call(document.querySelectorAll('.why'), function (w) {
+      w.style.display = hiding ? 'none' : '';
+    });
+    this.textContent = hiding ? 'Show Explanations' : 'Hide Explanations';
+  });
+
+  // ---------- attempt history ----------
+  function buildAttempts() {
+    var box = document.getElementById('attempts');
+    var log = [];
+    try { log = JSON.parse(localStorage.getItem('npdlExamAttempts') || '[]'); } catch (e) {}
+
+    if (!log.length) {
+      box.innerHTML = '<div class="notice">No attempts recorded yet on this device. ' +
+        'Results appear here after an examinee finishes <code>exam.html</code> in this same browser.</div>';
+      return;
+    }
+
+    var rows = log.map(function (a, idx) {
+      var when = new Date(a.takenAt);
+      return '<tr>' +
+        '<td>' + esc(a.name) + (a.appNo ? '<br><span class="muted" style="font-size:.8rem">Ref. ' + esc(a.appNo) + '</span>' : '') + '</td>' +
+        '<td>' + esc(a.category || '') + '</td>' +
+        '<td>' + (isNaN(when) ? '&mdash;' : when.toLocaleString()) + '</td>' +
+        '<td><strong>' + a.correct + ' / ' + a.total + '</strong><br>' +
+        '<span class="muted" style="font-size:.8rem">' + a.wrong + ' wrong, ' + a.blank + ' blank</span></td>' +
+        '<td>' + Math.floor(a.secondsUsed / 60) + 'm ' + (a.secondsUsed % 60) + 's' +
+        (a.timedOut ? '<br><span class="muted" style="font-size:.78rem">timed out</span>' : '') + '</td>' +
+        '<td><span class="pill ' + (a.passed ? 'pass' : 'fail') + '">' + (a.passed ? 'Passed' : 'Failed') + '</span></td>' +
+        '<td class="no-print"><button class="btn-ghost" style="padding:5px 12px;font-size:.8rem" data-idx="' + idx + '">Details</button></td>' +
+        '</tr>' +
+        '<tr class="hidden" id="det' + idx + '"><td colspan="7">' + detailHtml(a) + '</td></tr>';
+    }).join('');
+
+    box.innerHTML =
+      '<div style="overflow-x:auto"><table><thead><tr>' +
+      '<th>Examinee</th><th>Category</th><th>Date &amp; Time</th><th>Score</th><th>Time Used</th><th>Result</th><th class="no-print"></th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+
+    Array.prototype.forEach.call(box.querySelectorAll('button[data-idx]'), function (b) {
+      b.addEventListener('click', function () {
+        var row = document.getElementById('det' + b.dataset.idx);
+        row.classList.toggle('hidden');
+        b.textContent = row.classList.contains('hidden') ? 'Details' : 'Hide';
+      });
+    });
+  }
+
+  function detailHtml(a) {
+    var cells = (a.responses || []).map(function (r, i) {
+      var ok = r === QUESTIONS[i].answer;
+      var color = r === null ? 'var(--muted)' : (ok ? 'var(--ok)' : 'var(--bad)');
+      return '<div class="qg" style="border-color:' + color + '">' +
+        '<div class="n">No. ' + (i + 1) + '</div>' +
+        '<div class="a" style="color:' + color + '">' + (r === null ? '&ndash;' : LETTERS[r]) + '</div>' +
+        '</div>';
+    }).join('');
+    return '<div class="muted" style="font-size:.82rem;margin:6px 0">Answers given (green = correct, red = incorrect, dash = unanswered):</div>' +
+      '<div class="quickgrid" style="margin-bottom:10px">' + cells + '</div>';
+  }
+
+  document.getElementById('btnClearAttempts').addEventListener('click', function () {
+    if (!confirm('Permanently delete all recorded attempts stored in this browser?')) return;
+    try { localStorage.removeItem('npdlExamAttempts'); } catch (e) {}
+    buildAttempts();
+  });
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // keep the proctor signed in across page reloads within the same tab session
+  try {
+    if (sessionStorage.getItem(SESSION_FLAG) === '1') unlock();
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

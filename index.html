@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Non-Professional Driver's License Examination</title>
+<style>
+  :root {
+    --bg: #eef2f7;
+    --card: #ffffff;
+    --ink: #16202e;
+    --muted: #5f6f85;
+    --line: #d8e0ea;
+    --brand: #12508f;
+    --brand-dark: #0d3c6d;
+    --ok: #1c8a4a;
+    --shadow: 0 10px 30px rgba(18, 32, 46, .10);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  header {
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color: #fff;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  header h1 { margin: 0 0 6px; font-size: 1.5rem; }
+  header p { margin: 0; opacity: .85; font-size: .92rem; }
+
+  main { max-width: 780px; margin: -28px auto 60px; padding: 0 20px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 28px;
+  }
+
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 0 0 26px; }
+  .fact { background: #f7f9fc; border: 1px solid var(--line); border-radius: 10px; padding: 14px; text-align: center; }
+  .fact b { display: block; font-size: 1.4rem; }
+  .fact span { font-size: .72rem; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); }
+
+  .choice-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  a.panel {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color .15s, transform .15s;
+  }
+  a.panel:hover { border-color: var(--brand); transform: translateY(-2px); }
+  a.panel h2 { margin: 0 0 6px; font-size: 1.05rem; color: var(--brand); }
+  a.panel p { margin: 0; font-size: .86rem; color: var(--muted); }
+  a.panel.key h2 { color: var(--ok); }
+
+  ul { padding-left: 20px; }
+  li { margin-bottom: 5px; font-size: .93rem; }
+  h3 { font-size: 1rem; margin: 26px 0 8px; }
+  .note { background: #fffbea; border-left: 4px solid #f4b703; border-radius: 6px; padding: 12px 15px; font-size: .86rem; margin-top: 24px; }
+  footer { text-align: center; font-size: .8rem; color: var(--muted); padding: 0 20px 40px; }
+  footer a { color: var(--brand); }
+
+  @media (max-width: 560px) { .choice-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Non-Professional Driver's License Examination</h1>
+  <p>Written Examination &mdash; Road Signs, Traffic Rules &amp; Regulations</p>
+</header>
+
+<main>
+  <div class="card">
+
+    <div class="facts">
+      <div class="fact"><b>60</b><span>Questions</span></div>
+      <div class="fact"><b>60</b><span>Minutes</span></div>
+      <div class="fact"><b>45</b><span>To Pass</span></div>
+      <div class="fact"><b>22</b><span>Illustrated</span></div>
+    </div>
+
+    <div class="choice-row">
+      <a class="panel" href="exam.html">
+        <h2>Take the Examination &rarr;</h2>
+        <p>60 questions, one at a time, with a 60-minute countdown and an instant scored result.</p>
+      </a>
+      <a class="panel key" href="answer-key.html">
+        <h2>Answer Key &rarr;</h2>
+        <p>For proctors. Sign-in required. Includes explanations and recorded attempts.</p>
+      </a>
+    </div>
+
+    <h3>How it works</h3>
+    <ul>
+      <li>Enter your details, then press Start &mdash; the timer begins immediately.</li>
+      <li>Answer one question per screen. Press <em>Submit Answer</em> to lock it in and move on.</li>
+      <li>Submitted answers are final; you cannot return to a previous question.</li>
+      <li>At 00:00 the paper is submitted automatically and blanks are marked incorrect.</li>
+      <li>Afterwards you get your score, a pass/fail verdict, and a full item-by-item review.</li>
+    </ul>
+
+    <h3>What it covers</h3>
+    <ul>
+      <li>Road signs, signals, and pavement markings</li>
+      <li>Right of way, speed limits, overtaking, and parking</li>
+      <li>Defensive driving and vehicle emergencies</li>
+      <li>RA 8750, RA 10054, RA 10586, RA 10913, and RA 11229</li>
+    </ul>
+
+    <div class="note">
+      <strong>A study aid, not an official test.</strong> These questions were written
+      for this project rather than taken from an official LTO question set, and
+      traffic law changes. Check the legal specifics against current LTO material.
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  Runs entirely in your browser &mdash; no account, no tracking, nothing uploaded.<br>
+  <a href="https://github.com/jmcegos/Non-Professional-Drivers-License-Exam">Source on GitHub</a>
+</footer>
+
+</body>
+</html>

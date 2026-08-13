@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Non-Professional Driver's License Exam</title>
+<style>
+  :root {
+    --bg: #eef2f7;
+    --card: #ffffff;
+    --ink: #16202e;
+    --muted: #5f6f85;
+    --line: #d8e0ea;
+    --brand: #12508f;
+    --brand-dark: #0d3c6d;
+    --accent: #f4b703;
+    --ok: #1c8a4a;
+    --bad: #c62b2b;
+    --shadow: 0 10px 30px rgba(18, 32, 46, .10);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color: #fff;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .head-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .brand { flex: 1 1 260px; min-width: 0; }
+  .brand h1 { margin: 0; font-size: 1.15rem; letter-spacing: .2px; }
+  .brand p { margin: 2px 0 0; font-size: .8rem; opacity: .85; }
+
+  .timer {
+    background: rgba(255, 255, 255, .14);
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 10px;
+    padding: 8px 14px;
+    text-align: center;
+    min-width: 128px;
+  }
+  .timer .label { font-size: .66rem; text-transform: uppercase; letter-spacing: 1.2px; opacity: .85; }
+  .timer .clock { font-size: 1.55rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .timer.warn { background: rgba(244, 183, 3, .25); border-color: var(--accent); }
+  .timer.danger { background: rgba(198, 43, 43, .35); border-color: #ff8686; animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: .55; } }
+
+  /* ---------- layout ---------- */
+  main { max-width: 900px; margin: 24px auto 60px; padding: 0 20px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 26px;
+  }
+  h2 { margin: 0 0 12px; font-size: 1.3rem; }
+  .muted { color: var(--muted); }
+
+  /* ---------- progress ---------- */
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: .82rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin-bottom: 22px; }
+  .bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--brand), #2d86d8); transition: width .3s ease; }
+
+  /* ---------- question ---------- */
+  .qnum {
+    display: inline-block;
+    background: var(--brand);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+  }
+  .qtext { font-size: 1.12rem; font-weight: 600; margin: 0 0 20px; }
+
+  /* illustration shown above the choices on picture questions */
+  .art {
+    margin: 0 0 20px;
+    padding: 18px;
+    background: #f7f9fc;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    text-align: center;
+  }
+  .art svg { width: auto; max-width: 100%; max-height: 210px; height: auto; }
+  .art figcaption { font-size: .76rem; color: var(--muted); margin-top: 10px; letter-spacing: .3px; }
+  /* compact version used in the item review */
+  .art-sm { padding: 10px; margin: 8px 0 10px; background: #fff; }
+  .art-sm svg { max-height: 96px; }
+
+  .choices { display: grid; gap: 10px; }
+  .choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    padding: 13px 15px;
+    cursor: pointer;
+    background: #fbfcfe;
+    transition: border-color .15s, background .15s;
+  }
+  .choice:hover { border-color: #9fc0e2; background: #f4f8fd; }
+  .choice input { margin: 4px 0 0; accent-color: var(--brand); flex: none; width: 17px; height: 17px; }
+  .choice.selected { border-color: var(--brand); background: #eaf3fc; }
+  .choice .letter { font-weight: 700; color: var(--brand); flex: none; }
+
+  /* ---------- buttons ---------- */
+  .actions { display: flex; gap: 12px; align-items: center; margin-top: 24px; flex-wrap: wrap; }
+  button {
+    font: inherit;
+    font-weight: 600;
+    border: 0;
+    border-radius: 9px;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: filter .15s, background .15s;
+  }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.12); }
+  .btn-ghost { background: #fff; color: var(--brand); border: 2px solid var(--line); }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--brand); }
+  .btn-warn {
+    background: var(--ok);
+    color: #fff;
+    font-weight: 600;
+    border-radius: 9px;
+    padding: 12px 24px;
+  }
+  .hint { font-size: .82rem; color: var(--muted); }
+
+  /* ---------- start screen ---------- */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 5px; }
+  .field input, .field select {
+    font: inherit;
+    width: 100%;
+    padding: 11px 13px;
+    border: 2px solid var(--line);
+    border-radius: 9px;
+    background: #fbfcfe;
+  }
+  .field input:focus, .field select:focus { outline: 0; border-color: var(--brand); }
+  .rules { background: #f4f8fd; border-left: 4px solid var(--brand); border-radius: 8px; padding: 14px 18px; margin: 20px 0; font-size: .9rem; }
+  .rules ul { margin: 8px 0 0; padding-left: 20px; }
+  .rules li { margin-bottom: 4px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* ---------- results ---------- */
+  .score-hero { text-align: center; padding: 10px 0 20px; }
+  .score-hero .big { font-size: 3.4rem; font-weight: 800; line-height: 1; }
+  .verdict { display: inline-block; padding: 7px 22px; border-radius: 99px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: .85rem; margin-top: 12px; }
+  .verdict.pass { background: #e2f5e9; color: var(--ok); border: 2px solid var(--ok); }
+  .verdict.fail { background: #fdeaea; color: var(--bad); border: 2px solid var(--bad); }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 24px 0; }
+  .stat { background: #f7f9fc; border: 1px solid var(--line); border-radius: 10px; padding: 14px; text-align: center; }
+  .stat b { display: block; font-size: 1.5rem; }
+  .stat span { font-size: .74rem; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); }
+
+  .review-item { border: 1px solid var(--line); border-left-width: 5px; border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .review-item.right { border-left-color: var(--ok); background: #f6fcf8; }
+  .review-item.wrong { border-left-color: var(--bad); background: #fefafa; }
+  .review-item .rq { font-weight: 600; margin-bottom: 8px; }
+  .review-item .ra { font-size: .9rem; margin: 3px 0; }
+  .tag { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; padding: 2px 8px; border-radius: 99px; }
+  .tag.right { background: #e2f5e9; color: var(--ok); }
+  .tag.wrong { background: #fdeaea; color: var(--bad); }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 620px) {
+    .grid2 { grid-template-columns: 1fr; }
+    .card { padding: 20px 16px; }
+    .timer { min-width: 108px; }
+    .timer .clock { font-size: 1.3rem; }
+  }
+  @media print {
+    header, .actions, .no-print { display: none !important; }
+    body { background: #fff; }
+    .card { box-shadow: none; border: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-wrap">
+    <div class="brand">
+      <h1>Non-Professional Driver's License Examination</h1>
+      <p>Road Signs, Traffic Rules &amp; Regulations &mdash; <span id="headCount">&mdash;</span> Items</p>
+    </div>
+    <div class="timer" id="timerBox">
+      <div class="label">Time Remaining</div>
+      <div class="clock" id="clock">60:00</div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ START SCREEN ============ -->
+  <section id="startScreen" class="card">
+    <h2>Examinee Information</h2>
+    <p class="muted">Fill in your details, then begin the examination.</p>
+
+    <div class="grid2">
+      <div class="field">
+        <label for="fName">Full Name</label>
+        <input id="fName" type="text" placeholder="Surname, First Name M.I." autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="fApp">Application / Reference No.</label>
+        <input id="fApp" type="text" placeholder="Optional" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="fBirth">Date of Birth</label>
+        <input id="fBirth" type="date">
+      </div>
+      <div class="field">
+        <label for="fCat">Vehicle Category Applied For</label>
+        <select id="fCat">
+          <option>A &mdash; Motorcycle</option>
+          <option>A1 &mdash; Tricycle</option>
+          <option selected>B &mdash; Car / Van (up to 5,000 kg)</option>
+          <option>B1 &mdash; Light commercial vehicle</option>
+          <option>B2 &mdash; Light truck</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="rules">
+      <strong>Examination Rules</strong>
+      <ul>
+        <li>This examination has <strong id="ruleCount">&mdash;</strong> and a time limit of <strong id="ruleTime">&mdash;</strong>.</li>
+        <li>Questions are presented <strong>one at a time</strong>. Select an answer, then press <em>Submit Answer</em> to move to the next question.</li>
+        <li>Once submitted, an answer is <strong>final</strong> &mdash; you cannot go back.</li>
+        <li>A passing score is <strong id="rulePass">&mdash;</strong>.</li>
+        <li>When the timer reaches 00:00 the examination is submitted automatically and unanswered items are marked wrong.</li>
+      </ul>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" id="btnStart">Start Examination</button>
+      <span class="hint">The timer starts the moment you press Start.</span>
+    </div>
+  </section>
+
+  <!-- ============ EXAM SCREEN ============ -->
+  <section id="examScreen" class="card hidden">
+    <div class="progress-row">
+      <span id="progressText">&nbsp;</span>
+      <span id="answeredText">0 answered</span>
+    </div>
+    <div class="bar"><i id="progressBar"></i></div>
+
+    <div class="qnum" id="qNum">Question 1</div>
+    <p class="qtext" id="qText">&nbsp;</p>
+    <figure class="art hidden" id="qArt"></figure>
+    <div class="choices" id="choices"></div>
+
+    <div class="actions">
+      <button class="btn-primary" id="btnSubmitAnswer" disabled>Submit Answer</button>
+      <button class="btn-ghost" id="btnSkip">Skip</button>
+      <span class="hint" id="submitHint">Select one option to continue.</span>
+    </div>
+  </section>
+
+  <!-- ============ RESULT SCREEN ============ -->
+  <section id="resultScreen" class="card hidden">
+    <div class="score-hero">
+      <div class="muted" style="text-transform:uppercase;letter-spacing:1px;font-size:.78rem">Final Score</div>
+      <div class="big" id="scoreBig">&mdash;</div>
+      <div class="verdict" id="verdict">&mdash;</div>
+    </div>
+
+    <div id="resultMeta" class="muted" style="text-align:center;font-size:.9rem"></div>
+
+    <div class="stats">
+      <div class="stat"><b id="stCorrect">0</b><span>Correct</span></div>
+      <div class="stat"><b id="stWrong">0</b><span>Incorrect</span></div>
+      <div class="stat"><b id="stBlank">0</b><span>Unanswered</span></div>
+      <div class="stat"><b id="stPct">0%</b><span>Percentage</span></div>
+      <div class="stat"><b id="stTime">&mdash;</b><span>Time Used</span></div>
+    </div>
+
+    <h2>Item Review</h2>
+    <div id="review"></div>
+
+    <div class="actions no-print">
+      <button class="btn-primary" onclick="window.print()">Print Result</button>
+      <button class="btn-ghost" onclick="location.reload()">Take Again</button>
+      <a class="btn-warn" href="answer-key.html" style="text-decoration:none;display:inline-block">Answer Key (Proctor)</a>
+    </div>
+  </section>
+
+</main>
+
+<script src="signs.js"></script>
+<script src="questions.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var TOTAL = QUESTIONS.length;
+  var LETTERS = ['A', 'B', 'C', 'D', 'E'];
+
+  var current = 0;               // index of question on screen
+  var picked = null;             // choice index selected for the current question
+  var responses = new Array(TOTAL).fill(null);
+  var startedAt = null;
+  var deadline = null;
+  var ticker = null;
+  var finished = false;
+  var examinee = {};
+
+  // ---------- element handles ----------
+  var el = {
+    startScreen: document.getElementById('startScreen'),
+    examScreen: document.getElementById('examScreen'),
+    resultScreen: document.getElementById('resultScreen'),
+    timerBox: document.getElementById('timerBox'),
+    clock: document.getElementById('clock'),
+    qNum: document.getElementById('qNum'),
+    qText: document.getElementById('qText'),
+    qArt: document.getElementById('qArt'),
+    choices: document.getElementById('choices'),
+    progressText: document.getElementById('progressText'),
+    answeredText: document.getElementById('answeredText'),
+    progressBar: document.getElementById('progressBar'),
+    btnSubmitAnswer: document.getElementById('btnSubmitAnswer'),
+    btnSkip: document.getElementById('btnSkip'),
+    submitHint: document.getElementById('submitHint'),
+    review: document.getElementById('review')
+  };
+
+  // Every count shown to the examinee comes from the question bank, so adding or
+  // removing items in questions.js needs no edits here.
+  document.getElementById('clock').textContent = pad(EXAM_META.durationMinutes) + ':00';
+  document.getElementById('headCount').textContent = TOTAL;
+  document.getElementById('ruleCount').textContent = TOTAL + ' questions';
+  document.getElementById('ruleTime').textContent = EXAM_META.durationMinutes + ' minutes';
+  document.getElementById('rulePass').textContent =
+    EXAM_META.passingScore + ' out of ' + TOTAL +
+    ' (' + Math.round(EXAM_META.passingScore / TOTAL * 100) + '%)';
+
+  // ---------- start ----------
+  document.getElementById('btnStart').addEventListener('click', function () {
+    var name = document.getElementById('fName').value.trim();
+    if (!name) {
+      alert('Please enter your full name before starting the examination.');
+      document.getElementById('fName').focus();
+      return;
+    }
+    examinee = {
+      name: name,
+      appNo: document.getElementById('fApp').value.trim(),
+      birth: document.getElementById('fBirth').value,
+      category: document.getElementById('fCat').value
+    };
+
+    startedAt = new Date();
+    deadline = startedAt.getTime() + EXAM_META.durationMinutes * 60 * 1000;
+
+    el.startScreen.classList.add('hidden');
+    el.examScreen.classList.remove('hidden');
+
+    tick();
+    ticker = setInterval(tick, 250);
+    render();
+  });
+
+  // ---------- timer ----------
+  function tick() {
+    var left = Math.max(0, deadline - Date.now());
+    var secs = Math.floor(left / 1000);
+    el.clock.textContent = pad(Math.floor(secs / 60)) + ':' + pad(secs % 60);
+
+    el.timerBox.classList.toggle('warn', secs <= 600 && secs > 60);
+    el.timerBox.classList.toggle('danger', secs <= 60);
+
+    if (left <= 0 && !finished) {
+      clearInterval(ticker);
+      finish(true);
+    }
+  }
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  // ---------- render one question ----------
+  function render() {
+    var q = QUESTIONS[current];
+    picked = null;
+
+    el.qNum.textContent = 'Question ' + (current + 1);
+    el.qText.textContent = q.q;
+    el.progressText.textContent = 'Question ' + (current + 1) + ' of ' + TOTAL;
+    el.answeredText.textContent = countAnswered() + ' answered';
+    el.progressBar.style.width = (current / TOTAL * 100) + '%';
+
+    // Picture questions carry an `art` key resolved against signs.js.
+    var art = q.art && typeof SIGN_ART !== 'undefined' ? SIGN_ART[q.art] : null;
+    if (art) {
+      el.qArt.innerHTML = art + '<figcaption>Refer to the illustration above.</figcaption>';
+      el.qArt.classList.remove('hidden');
+    } else {
+      el.qArt.innerHTML = '';
+      el.qArt.classList.add('hidden');
+    }
+
+    el.choices.innerHTML = '';
+    q.choices.forEach(function (text, i) {
+      var label = document.createElement('label');
+      label.className = 'choice';
+      label.innerHTML =
+        '<input type="radio" name="choice" value="' + i + '">' +
+        '<span class="letter">' + LETTERS[i] + '.</span>' +
+        '<span>' + escapeHtml(text) + '</span>';
+      label.querySelector('input').addEventListener('change', function () {
+        picked = i;
+        Array.prototype.forEach.call(el.choices.children, function (c) { c.classList.remove('selected'); });
+        label.classList.add('selected');
+        el.btnSubmitAnswer.disabled = false;
+        el.submitHint.textContent = 'Press Submit Answer to lock it in and continue.';
+      });
+      el.choices.appendChild(label);
+    });
+
+    el.btnSubmitAnswer.disabled = true;
+    el.btnSubmitAnswer.textContent = (current === TOTAL - 1) ? 'Submit Final Answer' : 'Submit Answer';
+    el.submitHint.textContent = 'Select one option to continue.';
+    el.btnSkip.textContent = (current === TOTAL - 1) ? 'Leave Blank & Finish' : 'Skip';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function countAnswered() {
+    return responses.filter(function (r) { return r !== null; }).length;
+  }
+
+  // ---------- advance ----------
+  el.btnSubmitAnswer.addEventListener('click', function () {
+    if (picked === null) return;
+    responses[current] = picked;
+    advance();
+  });
+
+  el.btnSkip.addEventListener('click', function () {
+    if (!confirm('Leave this question unanswered? It will be marked incorrect and you cannot return to it.')) return;
+    responses[current] = null;
+    advance();
+  });
+
+  function advance() {
+    if (current === TOTAL - 1) {
+      clearInterval(ticker);
+      finish(false);
+    } else {
+      current++;
+      render();
+    }
+  }
+
+  // ---------- finish ----------
+  function finish(timedOut) {
+    finished = true;
+    var correct = 0, wrong = 0, blank = 0;
+
+    responses.forEach(function (r, i) {
+      if (r === null) blank++;
+      else if (r === QUESTIONS[i].answer) correct++;
+      else wrong++;
+    });
+
+    var pct = Math.round(correct / TOTAL * 100);
+    var passed = correct >= EXAM_META.passingScore;
+    var secondsUsed = Math.min(
+      EXAM_META.durationMinutes * 60,
+      Math.round((Date.now() - startedAt.getTime()) / 1000)
+    );
+
+    document.getElementById('scoreBig').textContent = correct + ' / ' + TOTAL;
+    var v = document.getElementById('verdict');
+    v.textContent = passed ? 'Passed' : 'Failed';
+    v.className = 'verdict ' + (passed ? 'pass' : 'fail');
+
+    document.getElementById('stCorrect').textContent = correct;
+    document.getElementById('stWrong').textContent = wrong;
+    document.getElementById('stBlank').textContent = blank;
+    document.getElementById('stPct').textContent = pct + '%';
+    document.getElementById('stTime').textContent =
+      Math.floor(secondsUsed / 60) + 'm ' + pad(secondsUsed % 60) + 's';
+
+    document.getElementById('resultMeta').innerHTML =
+      '<strong>' + escapeHtml(examinee.name) + '</strong>' +
+      (examinee.appNo ? ' &nbsp;&middot;&nbsp; Ref. ' + escapeHtml(examinee.appNo) : '') +
+      '<br>Category: ' + escapeHtml(examinee.category) +
+      ' &nbsp;&middot;&nbsp; ' + startedAt.toLocaleString() +
+      (timedOut ? '<br><span style="color:var(--bad);font-weight:600">Submitted automatically &mdash; time expired.</span>' : '') +
+      '<br>Passing score: ' + EXAM_META.passingScore + ' of ' + TOTAL +
+      ' (' + Math.round(EXAM_META.passingScore / TOTAL * 100) + '%)';
+
+    // ---- item review ----
+    el.review.innerHTML = '';
+    QUESTIONS.forEach(function (q, i) {
+      var r = responses[i];
+      var isRight = r === q.answer;
+      var d = document.createElement('div');
+      d.className = 'review-item ' + (isRight ? 'right' : 'wrong');
+      var thumb = q.art && typeof SIGN_ART !== 'undefined' && SIGN_ART[q.art]
+        ? '<div class="art art-sm">' + SIGN_ART[q.art] + '</div>' : '';
+      d.innerHTML =
+        '<div class="rq">' + (i + 1) + '. ' + escapeHtml(q.q) +
+        ' <span class="tag ' + (isRight ? 'right' : 'wrong') + '">' + (isRight ? 'Correct' : 'Incorrect') + '</span></div>' +
+        thumb +
+        '<div class="ra">Your answer: <strong>' +
+        (r === null ? '<em>(no answer)</em>' : LETTERS[r] + '. ' + escapeHtml(q.choices[r])) +
+        '</strong></div>' +
+        (isRight ? '' :
+          '<div class="ra">Correct answer: <strong style="color:var(--ok)">' +
+          LETTERS[q.answer] + '. ' + escapeHtml(q.choices[q.answer]) + '</strong></div>') +
+        '<div class="ra muted">' + escapeHtml(q.why) + '</div>';
+      el.review.appendChild(d);
+    });
+
+    // ---- save the attempt so the proctor page can read it ----
+    try {
+      var log = JSON.parse(localStorage.getItem('npdlExamAttempts') || '[]');
+      log.unshift({
+        name: examinee.name,
+        appNo: examinee.appNo,
+        category: examinee.category,
+        takenAt: startedAt.toISOString(),
+        secondsUsed: secondsUsed,
+        timedOut: timedOut,
+        correct: correct,
+        wrong: wrong,
+        blank: blank,
+        total: TOTAL,
+        passed: passed,
+        responses: responses
+      });
+      localStorage.setItem('npdlExamAttempts', JSON.stringify(log.slice(0, 50)));
+    } catch (e) { /* storage unavailable — result is still shown on screen */ }
+
+    el.examScreen.classList.add('hidden');
+    el.resultScreen.classList.remove('hidden');
+    el.timerBox.classList.remove('warn', 'danger');
+    el.clock.textContent = 'Done';
+    document.querySelector('.timer .label').textContent = 'Examination';
+    window.scrollTo({ top: 0 });
+  }
+
+  // ---------- misc ----------
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  window.addEventListener('beforeunload', function (e) {
+    if (startedAt && !finished) { e.preventDefault(); e.returnValue = ''; }
+  });
+})();
+</script>
+</body>
+</html>
